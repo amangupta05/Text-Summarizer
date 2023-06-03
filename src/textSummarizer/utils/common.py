@@ -1,6 +1,6 @@
 import os
 from box.exceptions import BoxValueError
-import yaml
+import yaml 
 from textSummarizer.logging import logger
 from ensure import ensure_annotations
 from box import ConfigBox

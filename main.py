@@ -1,73 +1,45 @@
-from textSummarizer.pipeline.stage_01_data_ingestion import DataIngestionTrainingPipeline
-from textSummarizer.pipeline.stage_02_data_validation import DataValidationTrainingPipeline
-from textSummarizer.pipeline.stage_03_data_transformation import DataTransformationTrainingPipeline
-from textSummarizer.pipeline.stage_04_model_trainer import ModelTrainerTrainingPipeline
-from textSummarizer.pipeline.stage_05_model_evaluation import ModelEvaluationTrainingPipeline
-from textSummarizer.logging import logger
+from fastapi import FastAPI
+import uvicorn
+import sys
+import os
+from fastapi.templating import Jinja2Templates
+from starlette.responses import RedirectResponse
+from fastapi.responses import Response
+from textSummarizer.pipeline.prediction import PredictionPipeline
 
 
-STAGE_NAME = "Data Ingestion stage"
-try:
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<") 
-   data_ingestion = DataIngestionTrainingPipeline()
-   data_ingestion.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
+text:str = "What is Text Summarization?"
+
+app = FastAPI()
+
+@app.get("/", tags=["authentication"])
+async def index():
+    return RedirectResponse(url="/docs")
+
+
+
+@app.get("/train")
+async def training():
+    try:
+        os.system("python main.py")
+        return Response("Training successful !!")
+
+    except Exception as e:
+        return Response(f"Error Occurred! {e}")
+    
+
+
+
+@app.post("/predict")
+async def predict_route(text):
+    try:
+
+        obj = PredictionPipeline()
+        text = obj.predict(text)
+        return text
+    except Exception as e:
         raise e
+    
 
-
-
-
-STAGE_NAME = "Data Validation stage"
-try:
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<") 
-   data_validation = DataValidationTrainingPipeline()
-   data_validation.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-STAGE_NAME = "Data Transformation stage"
-try:
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<") 
-   data_transformation = DataTransformationTrainingPipeline()
-   data_transformation.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-STAGE_NAME = "Model Trainer stage"
-try: 
-   logger.info(f"*******************")
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-   model_trainer = ModelTrainerTrainingPipeline()
-   model_trainer.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-
-STAGE_NAME = "Model Evaluation stage"
-try: 
-   logger.info(f"*******************")
-   logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
-   model_evaluation = ModelEvaluationTrainingPipeline()
-   model_evaluation.main()
-   logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
-except Exception as e:
-        logger.exception(e)
-        raise e
-
-
-
-
+if __name__=="__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8080)
